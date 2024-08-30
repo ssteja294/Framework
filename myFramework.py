@@ -16,24 +16,24 @@ def loadConfig():
 
 def displayMenu():
     print(f"--- {title} Management System ---")
-    index = 1 
-    for item in menu:
-        if item == "Exit":
-            print(f"{index}. {item}")
+    menuIndex = 1 
+    for menuItem in menu:
+        if menuItem == "Exit":
+            print(f"{menuIndex}. {menuItem}")
         else:
-            print(f"{index}. {item} {keyword}")
-        index += 1
+            print(f"{menuIndex}. {menuItem} {keyword}")
+        menuIndex += 1
 
 
 def createTable():
-     fields_definition = ', '.join([f"{field} TEXT" for field in field_names])
-     create_table_query = f"CREATE TABLE IF NOT EXISTS frameworkTable ({fields_definition})"
-     dbCursor.execute(create_table_query)
+     fieldsDefinition = ', '.join([f"{field} TEXT" for field in fieldNames])
+     createTableQuery = f"CREATE TABLE IF NOT EXISTS frameworkTable ({fieldsDefinition})"
+     dbCursor.execute(createTableQuery)
      dbConnection.commit()
 
 
 def createRecord():
-        values = [input(f"Enter {field}: ") for field in field_names]
+        values = [input(f"Enter {field}: ") for field in fieldNames]
         dbCursor.execute(f"INSERT INTO frameworkTable VALUES ({', '.join(['?'] * len(values))})", values)
         dbConnection.commit()
         print("Record created successfully.")
@@ -45,25 +45,25 @@ def printRecord():
             print(row)
  
 def updateRecord():
-         id = input(f"Enter the {field_names[0]} update: ")
+         id = input(f"Enter the {fieldNames[0]} update: ")
          updates = []
-         for field in field_names[1:]:
-            new_value = input(f"Enter new {field}: ")
-            updates.append(new_value)
-         update_fields = ', '.join([f"{field} = ?" for field in field_names[1:]])
-         dbCursor.execute(f"UPDATE frameworkTable SET {update_fields} WHERE {field_names[0]} = ?", (*updates, id))
+         for field in fieldNames[1:]:
+            newValue = input(f"Enter new {field}: ")
+            updates.append(newValue)
+         updateFields = ', '.join([f"{field} = ?" for field in fieldNames[1:]])
+         dbCursor.execute(f"UPDATE frameworkTable SET {updateFields} WHERE {fieldNames[0]} = ?", (*updates, id))
          dbConnection.commit()
          print("Record updated successfully.")
     
 def deleteRecord():
-        id = input(f"Enter the {field_names[0]} to delete: ")
-        dbCursor.execute(f"DELETE FROM frameworkTable WHERE {field_names[0]} = ?", (id,))
+        id = input(f"Enter the {fieldNames[0]} to delete: ")
+        dbCursor.execute(f"DELETE FROM frameworkTable WHERE {fieldNames[0]} = ?", (id,))
         dbConnection.commit()
         print("Record deleted successfully.")
     
 def searchRecord():
-        id = input(f"Enter the {field_names[0]} to search: ")
-        dbCursor.execute(f"SELECT * FROM frameworkTable WHERE {field_names[0]} = ?", (id,))
+        id = input(f"Enter the {fieldNames[0]} to search: ")
+        dbCursor.execute(f"SELECT * FROM frameworkTable WHERE {fieldNames[0]} = ?", (id,))
         result = dbCursor.fetchone()
         if result:
             print("Record found:", result)
@@ -84,7 +84,7 @@ def main():
             deleteRecord()
         elif choice == '5':
             searchRecord()
-        elif choice == '6' or choice.lower() == 'exit':
+        elif choice == '6':
             print("Exiting the program.")
             break
         else:
@@ -93,7 +93,7 @@ def main():
 config = loadConfig()
 menu = config.get("Menu", [])
 title = config.get("Title")
-field_names = config.get("FieldNames", [])
+fieldNames = config.get("FieldNames", [])
 keyword = config.get("keyword" )
 createTable()
 main()
