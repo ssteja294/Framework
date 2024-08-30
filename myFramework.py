@@ -5,17 +5,25 @@ dbConnection = sqlite3.connect("Framework.db")
 dbCursor = dbConnection.cursor()
 
 def loadConfig():
-        keys = dbCursor.execute("SELECT key FROM configuration").fetchall()
-        values = dbCursor.execute("SELECT value FROM configuration").fetchall()
-        config = {key[0]: eval(value[0]) for key, value in zip(keys, values)}
+        config = {}
+        rows = dbCursor.execute("SELECT key, value FROM configuration").fetchall()
+        for key, value in rows:
+            if value.startswith("[") and value.endswith("]"):
+                config[key] = eval(value)
+            else:
+                config[key] = value
         return config
 
 def displayMenu():
     print(f"--- {title} Management System ---")
     index = 1 
     for item in menu:
-        print(f"{index}. {item}")
+        if item == "Exit":
+            print(f"{index}. {item}")
+        else:
+            print(f"{index}. {item} {keyword}")
         index += 1
+
 
 def createTable():
      fields_definition = ', '.join([f"{field} TEXT" for field in field_names])
@@ -25,7 +33,6 @@ def createTable():
 
 
 def createRecord():
-        createTable()
         values = [input(f"Enter {field}: ") for field in field_names]
         dbCursor.execute(f"INSERT INTO frameworkTable VALUES ({', '.join(['?'] * len(values))})", values)
         dbConnection.commit()
@@ -38,7 +45,7 @@ def printRecord():
             print(row)
  
 def updateRecord():
-         id = input(f"Enter the {field_names[0]} of the record to update: ")
+         id = input(f"Enter the {field_names[0]} update: ")
          updates = []
          for field in field_names[1:]:
             new_value = input(f"Enter new {field}: ")
@@ -49,13 +56,13 @@ def updateRecord():
          print("Record updated successfully.")
     
 def deleteRecord():
-        id = input(f"Enter the {field_names[0]} of the record to delete: ")
+        id = input(f"Enter the {field_names[0]} to delete: ")
         dbCursor.execute(f"DELETE FROM frameworkTable WHERE {field_names[0]} = ?", (id,))
         dbConnection.commit()
         print("Record deleted successfully.")
     
 def searchRecord():
-        id = input(f"Enter the {field_names[0]} of the record to search: ")
+        id = input(f"Enter the {field_names[0]} to search: ")
         dbCursor.execute(f"SELECT * FROM frameworkTable WHERE {field_names[0]} = ?", (id,))
         result = dbCursor.fetchone()
         if result:
@@ -85,6 +92,8 @@ def main():
 
 config = loadConfig()
 menu = config.get("Menu", [])
-title = config.get("Title", "Framework")
+title = config.get("Title")
 field_names = config.get("FieldNames", [])
+keyword = config.get("keyword" )
+createTable()
 main()
